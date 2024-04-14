@@ -1,3 +1,3 @@
 import { MongoClient, Collection, Db, ObjectId } from 'mongodb'
 
-export const ModelCollections: { books?: Collection } = {}
+export const ModelCollections: { books?: Collection, gameState?: Collection } = {}

@@ -1,14 +1,7 @@
 
 import { Book } from '../models/book.js'
 import { ModelCollections } from '../models/collections.js'
-import { PubSub } from 'graphql-subscriptions';
-
-
-var pubSub: PubSub;
-
-export function setPubSub(ps: PubSub) {
-    pubSub = ps;
-}
+import { getPubSub } from './pubsub.js';
 
 export async function listBooks (): Promise<Book[]> {
     const values = await ModelCollections.books.find({}).toArray()  
@@ -22,7 +15,7 @@ export async function addABook (parent, args, context) :Promise<string> {
         title, author, price, inventory
     };
     let result = await ModelCollections.books.insertOne(b)
-    pubSub.publish('NEW_BOOK_ADDED', { newBookAdded: b });
+    getPubSub().publish('NEW_BOOK_ADDED', { newBookAdded: b });
     return result.insertedId.toString()
 }
 

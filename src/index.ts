@@ -14,7 +14,8 @@ import { MongoClient} from 'mongodb'
 import { Book } from './apollo/models/book.js'
 import { ModelCollections } from './apollo/models/collections.js'
 import { connectToDatabase } from './mongo.js'
-import { setPubSub, listBooks, addABook} from './apollo/resolvers/books.js';
+import { setPubSub } from './apollo/resolvers/pubsub.js';
+import { getGameState } from './apollo/resolvers/gameState.js';
 
 const PORT = 4000;
 const pubsub = new PubSub();
@@ -26,49 +27,35 @@ setPubSub(pubsub);
 const typeDefs = `#graphql
   # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String!
-    author: String!
-    price: Float!
-    inventory: Int!
+  type Player {
+    id: String!
+    name: String!
+    role: String!
+    status: String!
+    votes: [String]!
+    killVote: [String]!
+  }
+
+  type GameState {
+    players: [Player]!
+    hostId: String!
+    round: Int!
+    phase: String!
   }
 
   type Query {
     """
-    List all books
+    Get GameState
     """
-    books: [Book]
+    gameState: GameState
   }
-
-  type Mutation {
-    """
-    Add a book
-    """
-    addBook (title: String!, author: String!, price: Float!, inventory: Int!): String!
-  }
-
-  type Subscription {
-    newBookAdded: Book
-  }
-
 `;
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
 const resolvers = {
     Query: {
-      books:  listBooks,
-    },
-
-    Mutation: {
-      addBook: addABook,
-    },
-
-    Subscription: {
-      newBookAdded: {
-        subscribe: () => pubsub.asyncIterator(['NEW_BOOK_ADDED']),
-      },
+      gameState:  getGameState,
     },
 };
 
